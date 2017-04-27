@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.CategoryMapper">
+	
+	<resultMap type="categoryCustom" id="resultMapCategoryCustom">
+		<result property="id" column="id" jdbcType="INTEGER" />
+		<result property="name" column="name" jdbcType="VARCHAR" />
+		<result property="number" column="number" jdbcType="VARCHAR" />
+		<result property="remark" column="remark" jdbcType="VARCHAR" />
+		<result property="spare" column="spare" jdbcType="VARCHAR" />
+		<result property="enterimg" column="enterimg" jdbcType="VARCHAR" />
+		<result property="outimg" column="outimg" jdbcType="VARCHAR" />
+		<result property="cid" column="cid" jdbcType="INTEGER" />
+		<result property="pname" column="pname" jdbcType="VARCHAR" />
+	
+	</resultMap>
+	
+	<!-- 定义基本的sql语句 -->
+	<sql id="baseCategorySql">
+		select c.*,p.name pname from category c left JOIN category p on c.cid=p.id 
+	</sql>
+
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="category">
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select LAST_INSERT_ID()
+		</selectKey>
+		 insert into category (name, number,remark, spare, cid) values (#{name,jdbcType=VARCHAR}, #{number,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR}, #{spare,jdbcType=VARCHAR}, #{cid,jdbcType=INTEGER})
+	</insert>
+
+	<update id="updateObject" parameterType="category">
+		 update category
+    	set name = #{name,jdbcType=VARCHAR},
+      	number = #{number,jdbcType=VARCHAR},
+      	remark = #{remark,jdbcType=VARCHAR},
+      	spare = #{spare,jdbcType=VARCHAR},
+      	cid = #{cid,jdbcType=INTEGER}
+    	where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<delete id="deleteObject" parameterType="category"></delete>
+
+	<delete id="deleteObjectById" parameterType="java.lang.Integer">
+		delete from category where id = #{id,jdbcType=INTEGER}
+	</delete>
+
+
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultMap="resultMapCategoryCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseCategorySql" />
+		where c.id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultMap="resultMapCategoryCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseCategorySql" />
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null">
+					and c.name like '%${entity.name}%'
+				</if>
+				<if test="entity.pname!=null">
+					and p.name like '%${entity.pname}%'
+				</if>
+			</if>
+		</where>
+
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="java.lang.Integer">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from category
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null">
+					and name like '%${entity.name}%'
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	
+</mapper>

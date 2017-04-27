@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.EvaluateMapper">
+
+
+	<resultMap type="www.change.tm.changeshop.domain.EvaluateCustom" id="resultMapEvaluateCustom">
+		<result property="id" column="id" jdbcType="INTEGER"/>
+		<result property="comDate" column="comDate" jdbcType="TIMESTAMP"/>
+		<result property="message" column="message" jdbcType="VARCHAR"/>
+		<result property="uid" column="uid" jdbcType="INTEGER"/>
+		<result property="gid" column="gid" jdbcType="INTEGER"/>
+		<result property="gname" column="gname" jdbcType="VARCHAR"/>
+		<result property="uname" column="uname" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!-- 定义基本的sql语句 -->
+	<sql id="baseEvaluateSql">
+		select e.*,good.name gname from 
+(select evaluate.*,user.name uname from evaluate LEFT JOIN user ON user.id=evaluate.uid ) e LEFT JOIN good
+		ON e.gid=good.id
+	</sql>
+
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="evaluate">
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select LAST_INSERT_ID()
+		</selectKey>
+		insert into evaluate
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="comDate!=null">comDate ,</if>
+			<if test="message!=null">message ,</if>
+			<if test="spare!=null">spare ,</if>
+			
+			<if test="uid!=null">uid ,</if>
+			<if test="gid!=null">gid </if>
+
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="comDate!=null">#{comDate,jdbcType=TIMESTAMP} ,</if>
+			<if test="message!=null">#{message} ,</if>
+			<if test="spare!=null">#{spare} ,</if>
+			<if test="uid!=null">#{uid} ,</if>
+			<if test="gid!=null">#{gid} </if>
+			
+		</trim>
+	</insert>
+
+	<update id="updateObject" parameterType="evaluate">
+		update evaluate
+		<trim prefix="set" suffix=" where" suffixOverrides=",">
+				<if test="comDate!=null">comDate=#{comDate,jdbcType=TIMESTAMP} ,</if>
+			<if test="message!=null">message=#{message} ,</if>
+			<if test="spare!=null">spare=#{spare} ,</if>
+			<if test="uid!=null">uid=#{uid} ,</if>
+			<if test="gid!=null">gid=#{gid} </if>
+		</trim>
+		id= #{id}
+	</update>
+
+	<delete id="deleteObject" parameterType="evaluate">
+		delete from evaluate where
+		id = #{id}
+	</delete>
+
+	<delete id="deleteObjectById" parameterType="int">
+		delete from evaluate
+		where id = #{id}
+	</delete>
+
+
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultMap="resultMapEvaluateCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseEvaluateSql" />
+		where e.id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultMap="resultMapEvaluateCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseEvaluateSql" />
+		<where>
+			<if test="entity!=null">
+				<if test="entity.uid!=null and entity.uid!=''">
+					and uid = #{entity.uid}
+				</if>
+				<if test="entity.gid!=null and entity.gid!=''">
+					and gid = #{entity.gid}
+				</if>
+				<if test="entity.message!=null and entity.message!=''">
+					and message like '%${entity.message}%'
+				</if>
+			</if>
+		</where>
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="int">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from evaluate
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.uid!=null and entity.uid!=''">
+					and uid = #{entity.uid}
+				</if>
+				<if test="entity.gid!=null and entity.gid!=''">
+					and gid = #{entity.gid}
+				</if>
+				<if test="entity.message!=null and entity.message!=''">
+					and message like '%${entity.message}%'
+				</if>
+			</if>
+		</where>
+	</select>
+
+
+</mapper>

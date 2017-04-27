@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.GoodMapper">
+	
+	<resultMap type="goodCustom" id="resultMapGoodCustom">
+		<id column="id" jdbcType="INTEGER" property="id" />
+	    <result column="click" jdbcType="INTEGER" property="click" />
+	   
+	    <result column="hote" jdbcType="INTEGER" property="hote" />
+	    <result column="interpor" jdbcType="INTEGER" property="interpor" />
+	    <result column="name" jdbcType="VARCHAR" property="name" />
+	    <result column="num" jdbcType="INTEGER" property="num" />
+	    <result column="number" jdbcType="VARCHAR" property="number" />
+	
+	    <result column="price" jdbcType="DOUBLE" property="price" />
+	    <result column="quantity" jdbcType="INTEGER" property="quantity" />
+	    <result column="remark" jdbcType="VARCHAR" property="remark" />
+	    <result column="spare" jdbcType="VARCHAR" property="spare" />
+	    <result column="acid" jdbcType="INTEGER" property="acid" />
+	    <result column="cid" jdbcType="INTEGER" property="cid" />
+	
+		
+		<result property="cname" column="cname" jdbcType="VARCHAR" />
+		<result property="aname" column="aname" jdbcType="VARCHAR" />
+	
+	</resultMap>
+
+	
+	<!-- 定义基本的sql语句 -->
+	<sql id="base">
+		select g.*,c.name cname,a.name aname from (good g left JOIN category c on g.cid=c.id ) LEFT JOIN activity a ON g.acid=a.id
+	</sql>
+	
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="good">
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select LAST_INSERT_ID()
+		</selectKey>
+	 insert into good (addTime, click, createDate, hote, interpor, name, num, number, outDate, price, quantity,remark, spare, acid, cid)
+      values (#{addtime,jdbcType=TIMESTAMP}, #{click,jdbcType=INTEGER}, 
+      #{createdate,jdbcType=TIMESTAMP}, #{hote,jdbcType=INTEGER}, #{interpor,jdbcType=INTEGER}, 
+      #{name,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, #{number,jdbcType=VARCHAR}, 
+      #{outdate,jdbcType=TIMESTAMP}, #{price,jdbcType=DOUBLE}, #{quantity,jdbcType=INTEGER}, 
+      #{remark,jdbcType=VARCHAR}, #{spare,jdbcType=VARCHAR}, #{acid,jdbcType=INTEGER}, 
+      #{cid,jdbcType=INTEGER})
+	</insert>
+
+	<update id="updateObject" parameterType="good">
+	
+		 update good set 
+      		click = #{click,jdbcType=INTEGER},
+      	
+      		hote = #{hote,jdbcType=INTEGER},
+     		interpor = #{interpor,jdbcType=INTEGER},
+      		name = #{name,jdbcType=VARCHAR},
+      		num = #{num,jdbcType=INTEGER},
+      		number = #{number,jdbcType=VARCHAR},
+      		price = #{price,jdbcType=DOUBLE},
+      		quantity = #{quantity,jdbcType=INTEGER},
+      		remark = #{remark,jdbcType=VARCHAR},
+      		spare = #{spare,jdbcType=VARCHAR},
+      		acid = #{acid,jdbcType=INTEGER},
+      		cid = #{cid,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+	
+	</update>
+
+	<delete id="deleteObject" parameterType="good"></delete>
+
+	<delete id="deleteObjectById" parameterType="java.lang.Integer">
+		delete from good where id = #{id,jdbcType=INTEGER}
+	</delete>
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultMap="resultMapGoodCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="base" />
+		where g.id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultMap="resultMapGoodCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="base" />
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null">
+					and g.name like '%${entity.name}%'
+				</if>
+				<if test="entity.number!=null">
+					and g.number like '%${entity.number}%'
+				</if>
+			</if>
+		</where>
+
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="int">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from good
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null">
+					and name like '%${entity.name}%'
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	
+</mapper>

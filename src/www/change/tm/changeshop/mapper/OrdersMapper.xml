@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.OrdersMapper">
+
+	<resultMap type="OrdersCustom" id="resultMapOrdersCustom">
+		<result property="id" column="id" jdbcType="INTEGER"/>
+		<result property="signTime" column="signTime" jdbcType="DATE"/>
+		<result property="number" column="number" jdbcType="VARCHAR"/>
+		<result property="orderTime" column="orderTime" jdbcType="DATE"/>
+		<result property="orderType" column="orderType" jdbcType="INTEGER"/>
+		<result property="payType" column="payType" jdbcType="INTEGER"/>
+		<result property="spare" column="spare" jdbcType="VARCHAR"/>
+		<result property="totalPrice" column="totalPrice" jdbcType="DOUBLE"/>
+		<result property="aid" column="aid" jdbcType="INTEGER"/>
+		<result property="uid" column="uid" jdbcType="INTEGER"/>
+		<result property="uname" column="uname" jdbcType="VARCHAR"/>
+		<result property="pname" column="pname" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<!-- 定义基本的sql语句 -->
+	<sql id="baseOrdersSql">
+		select o.*,a.address pname,u.name uname from orders o LEFT JOIN address a on o.aid=a.id LEFT JOIN user u on o.uid=u.id
+	</sql>
+
+
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="orders">
+
+		<!-- selectKey将主键返回，需要再返回 -->
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select
+			LAST_INSERT_ID()
+		</selectKey>
+		insert into orders
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="signTime!=null and signTime!=''">signTime ,</if>
+			<if test="number!=null and number!=''">number ,</if>
+			<if test="orderTime!=null and orderTime!=''">orderTime ,</if>
+			<if test="orderType!=null and orderType!=''">orderType ,</if>
+			<if test="payType!=null and payType!=''">payType ,</if>
+			<if test="spare!=null and spare!=''">spare ,</if>
+			<if test="totalPrice!=null and totalPrice!=''">totalPrice ,</if>
+			<if test="aid!=null and aid!=''">aid ,</if>
+			<if test="uid!=null and uid!=''">uid ,</if>
+
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+				<if test="signTime!=null and signTime!=''">#{signTime,jdbcType=DATE} ,</if>
+			<if test="number!=null and number!=''">#{number} ,</if>
+			<if test="orderTime!=null and orderTime!=''">#{orderTime,jdbcType=DATE },</if>
+			<if test="orderType!=null and orderType!=''">#{orderType} ,</if>
+			<if test="payType!=null and payType!=''">#{payType} ,</if>
+			<if test="spare!=null and spare!=''">#{spare} ,</if>
+			<if test="totalPrice!=null and totalPrice!=''">#{totalPrice} ,</if>
+			<if test="aid!=null and aid!=''">#{aid} ,</if>
+			<if test="uid!=null and uid!=''">#{uid} ,</if>
+		</trim>
+	</insert>
+
+	<update id="updateObject" parameterType="orders">
+	update orders
+		<trim prefix="set" suffix=" where" suffixOverrides=",">
+			<if test="number!=null">number=#{number} ,</if>
+			<!-- <if test="orderTime!=null">orderTime=#{orderTime,jdbcType=TIMESTAMP} ,</if> -->
+			<if test="orderType!=null">orderType=#{orderType} ,</if>
+			<if test="payType!=null">payType=#{payType} ,</if>
+			<!-- <if test="signTime!=null">signTime=#{signTime,jdbcType=TIMESTAMP} ,</if> -->
+			<if test="spare!=null">spare=#{spare} ,</if>
+			<if test="totalPrice!=null">totalPrice=#{totalPrice} ,</if>
+			<if test="uid!=null">uid=#{uid,jdbcType=INTEGER} ,</if>
+			<if test="aid!=null">aid=#{aid,jdbcType=INTEGER} ,</if>
+		</trim>
+		id= #{id,jdbcType=INTEGER}
+	</update>
+
+	<delete id="deleteObject" parameterType="orders">
+		delete from orders where id=#{id}
+	</delete>
+
+	<delete id="deleteObjectById" parameterType="int">delete from orders where id=#{id}</delete>
+
+
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultMap="resultMapOrdersCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseOrdersSql" />
+		where o.id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultMap="resultMapOrdersCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseOrdersSql" />
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.number!=null and entity.number!=''">
+					and number like '%${entity.number}%'
+				</if>
+				<!-- 其它条件 -->
+				<!-- <if test="entity.email!=null">
+					and email like '%${entity.email}%'
+				</if> -->
+			</if>
+		</where>
+
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="int">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from orders
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.number!=null and entity.number!=''">
+					and number like '%${entity.number}%'
+				</if>
+				<!-- 其它条件 -->
+				<!-- <if test="entity.email!=null">
+					and email like '%${entity.email}%'
+				</if> -->
+			</if>
+		</where>
+	</select>
+
+
+</mapper>

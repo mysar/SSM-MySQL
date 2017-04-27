@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.UsersMapper">
+
+	<!-- 定义基本的sql语句 -->
+	<sql id="baseUserSql">
+		select
+		id,admin,email,name,password,phone,registTime,sex,spare,state,telBind,userName
+		from user
+	</sql>
+
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="users">
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select LAST_INSERT_ID()
+		</selectKey>
+		insert into user
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="admin!=null and admin!=''">admin ,</if>
+			<if test="email!=null and email!=''">email ,</if>
+			<if test="sex!=null and sex!=''">sex ,</if>
+			<if test="name!=null and name!=''">name ,</if>
+			<if test="password!=null and password!=''">password ,</if>
+			<if test="phone!=null and phone!=''">phone ,</if>
+			<if test="registTime!=null and registTime!=''">registTime ,</if>
+			<if test="spare!=null and spare!=''">spare ,</if>
+			<if test="state!=null and state!=''">state ,</if>
+			<if test="telbind!=null and telbind!=''">telbind ,</if>
+			<if test="userName!=null and userName!=''">userName </if>
+
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+				<if test="admin!=null and admin!=''">#{admin} ,</if>
+			<if test="email!=null and email!=''">#{email} ,</if>
+			<if test="sex!=null and sex!=''">#{sex },</if>
+			<if test="name!=null and name!=''">#{name} ,</if>
+			<if test="password!=null and password!=''">#{password} ,</if>
+			<if test="phone!=null and phone!=''">#{phone} ,</if>
+			<if test="registTime!=null and registTime!=''">#{registTime,jdbcType=TIMESTAMP} ,</if>
+			<if test="spare!=null and spare!=''">#{spare} ,</if>
+			<if test="state!=null and state!=''">#{state} ,</if>
+			<if test="telbind!=null and telbind!=''">#{telbind} ,</if>
+			<if test="userName!=null and userName!=''">#{userName} </if>
+		</trim>
+	</insert>
+
+	<update id="updateObject" parameterType="users">
+		update user
+		<trim prefix="set" suffix=" where" suffixOverrides=",">
+			<if test="admin!=null">admin=#{admin} ,</if>
+			<if test="email!=null">email=#{email} ,</if>
+			<if test="sex!=null">sex=#{sex },</if>
+			<if test="name!=null">name=#{name} ,</if>
+			<if test="password!=null">password=#{password} ,</if>
+			<if test="phone!=null">phone=#{phone} ,</if>
+			<if test="registTime!=null">registTime=#{registTime,jdbcType=TIMESTAMP} ,</if>
+			<if test="spare!=null">spare=#{spare} ,</if>
+			<if test="state!=null">state=#{state} ,</if>
+			<if test="telbind!=null">telbind=#{telbind} ,</if>
+			<if test="userName!=null">username=#{userName} </if>
+
+		</trim>
+		id= #{id}
+	</update>
+
+	<delete id="deleteObject" parameterType="users">
+		delete from user where id = #{id}
+	</delete>
+
+	<delete id="deleteObjectById" parameterType="int">
+		delete from user where id = #{id}
+	</delete>
+
+
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultType="users">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseUserSql" />
+		where id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultType="users">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseUserSql" />
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null and entity.name!=''">
+					and name like '%${entity.name}%'
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.email!=null and entity.email!=''">
+					and email like '%${entity.email}%'
+				</if>
+				<if test="entity.phone!=null and entity.phone!=''">
+					and phone like '%${entity.phone}%'
+				</if>
+			</if>
+		</where>
+
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="int">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from user
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null and entity.name!=''">
+					and name like '%${entity.name}%'
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.email!=null and entity.email!=''">
+					and email like '%${entity.email}%'
+				</if>
+				<if test="entity.phone!=null and entity.phone!=''">
+					and phone like '%${entity.phone}%'
+				</if>
+			</if>
+		</where>
+	</select>
+
+
+</mapper>

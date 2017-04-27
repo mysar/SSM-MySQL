@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.ImgsMapper">
+
+
+	<!-- 定义基本的sql语句 -->
+	<sql id="baseImgsSql">
+		select id,img,interpor,remark from imgs
+	</sql>
+
+
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="imgs">
+
+		<!-- selectKey将主键返回，需要再返回 -->
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select
+			LAST_INSERT_ID()
+		</selectKey>
+		insert into imgs
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="img!=null and img!=''">img ,</if>
+			<if test="interpor!=null and interpor!=''">interpor ,</if>
+			<if test="remark!=null and remark!=''">remark ,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="img!=null and img!=''">${img} ,</if>
+			<if test="interpor!=null and interpor!=''">${interpor} ,</if>
+			<if test="remark!=null and remark!=''">${remark} ,</if>
+		</trim>
+
+	</insert>
+
+	<update id="updateObject" parameterType="imgs">
+		UPDATE imgs
+		<trim prefix="set" suffixOverrides=",">
+			<if test="img!=null and img!=''">img=#{img},</if>
+			
+			<if test="interpor!=null">interpor=#{interpor},</if>
+			<if test="remark!=null and remark!=''">remark=#{remark},</if>
+		</trim>
+		WHERE id=#{id}
+
+	</update>
+
+	<delete id="deleteObject" parameterType="imgs"></delete>
+
+	<delete id="deleteObjectById" parameterType="int">delete from imgs
+		where id=#{id}
+	</delete>
+
+
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultType="imgs">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseImgsSql" />
+		where id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultType="imgs">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseImgsSql" />
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.img!=null and entity.img!=''">
+					and img =#{entity.img}
+				</if>
+				<if test="entity.interpor!=null and entity.interpor!=''">
+					and interpor = #{entity.interpor}
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.remark!=null and entity.remark!=''">
+					and remark= #{entity.remark}
+				</if>
+				
+			</if>
+		</where>
+
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="int">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from imgs
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.img!=null and entity.img!=''">
+					and img like '%${entity.img}%'
+				</if>
+				<if test="entity.interpor!=null and entity.interpor!=''">
+					and interpor = #{entity.interpor}
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.remark!=null and entity.remark!=''">
+					and remark= #{entity.remark}
+				</if>
+				
+			</if>
+		</where>
+	</select>
+
+
+</mapper>

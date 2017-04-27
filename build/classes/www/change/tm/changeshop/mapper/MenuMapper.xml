@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.MenuMapper">
+
+<resultMap type="menuCustom" id="resultMapMenuCustom">
+<result property="mid" column="mid" jdbcType="INTEGER"/>
+<result property="pname" column="pname" jdbcType="VARCHAR"/>
+
+</resultMap>
+	<!-- 定义基本的sql语句 -->
+	<sql id="baseMenuSql">
+		SELECT m.*,e.name pname FROM menu m LEFT JOIN menu e ON m.mid=e.id
+	</sql>
+
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="menu">
+	<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select LAST_INSERT_ID()
+		</selectKey>
+	insert into menu
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+		
+			<if test="name!=null and name!=''">name,</if>
+			
+			<if test="icon!=null and icon!=''">icon,</if>
+			<if test="url!=null and url!=''">url,</if>
+			<if test="mid!=null and mid!=''">mid,</if>
+		
+		</trim> 
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+		
+			<if test="name!=null and name!=''">#{name},</if>
+			
+			<if test="icon!=null and icon!=''">#{icon},</if>
+			<if test="url!=null and url!=''">#{url},</if>
+			<if test="mid!=null and mid!=''">#{mid},</if>
+		
+		</trim>
+		
+	</insert>
+
+	<update id="updateObject" parameterType="menu">
+	UPDATE menu
+		<trim prefix="set" suffixOverrides=",">
+			
+			
+		
+			<if test="name!=null and name!=''">name=#{name,jdbcType=VARCHAR},</if>
+			
+			<if test="icon!=null and icon!=''">icon=#{icon,jdbcType=VARCHAR},</if>
+			<if test="url!=null and url!=''">url=#{url,jdbcType=VARCHAR},</if>
+		
+		</trim>
+		WHERE id=#{id}
+
+	</update>
+
+	<delete id="deleteObject" parameterType="menu"></delete>
+
+	<delete id="deleteObjectById" parameterType="int">
+	delete from menu where id=#{id}
+	</delete>
+
+
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultMap="resultMapMenuCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseMenuSql" />
+		where m.id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultMap="resultMapMenuCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseMenuSql" />
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null">
+					and name like '%${entity.name}%'
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.icon!=null">
+					and icon like '%${entity.icon}%'
+				</if>
+			</if>
+		</where>
+
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="int">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from menu
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null">
+					and name like '%${entity.name}%'
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.icon!=null">
+					and icon like '%${entity.icon}%'
+				</if>
+			</if>
+		</where>
+	</select>
+
+
+</mapper>

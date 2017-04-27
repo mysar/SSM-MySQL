@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.AddressMapper">
+	<resultMap type="addressCustom" id="addressCustom">
+		<result property="id" column="id" jdbcType="INTEGER" />
+		<result property="address" column="address" jdbcType="VARCHAR" />
+		<result property="createDate" column="createDate" jdbcType="TIMESTAMP" />
+		<result property="defaultAdd" column="defaultAdd" jdbcType="INTEGER" />
+		<result property="name" column="name" jdbcType="VARCHAR" />
+		<result property="spare" column="spare" jdbcType="VARCHAR" />
+		<result property="phone" column="phone" jdbcType="VARCHAR" />
+		<result property="uid" column="uid" jdbcType="INTEGER" />
+		<result property="pid" column="pid" jdbcType="INTEGER" />
+		<result property="pname" column="pname" jdbcType="VARCHAR" />
+
+	</resultMap>
+
+	<!-- 定义基本的sql语句 -->
+	<sql id="baseAddressSql">
+		select a.*,u.id pid,u.name pname from address a LEFT JOIN
+		user u on a.uid=u.id
+	</sql>
+
+
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="address">
+
+		<!-- selectKey将主键返回，需要再返回 -->
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select
+			LAST_INSERT_ID()
+		</selectKey>
+		insert into address
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="address!=null and address!=''">address ,</if>
+			<if test="name!=null and name!=''">name ,</if>
+			<if test="phone!=null and phone!=''">phone ,</if>
+			<if test="uid!=null and uid!=''">uid ,</if>
+
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="address!=null and address!=''">${address} ,</if>
+			<if test="name!=null and name!=''">${name} ,</if>
+			<if test="phone!=null and phone!=''">${phone} ,</if>
+			<if test="uid!=null and uid!=''">${uid} ,</if>
+		</trim>
+
+	</insert>
+
+	<update id="updateObject" parameterType="address">
+		UPDATE address
+		<trim prefix="set" suffixOverrides=",">
+			<if test="address!=null and address!=''">address=#{address},</if>
+			
+			<if test="name!=null and name!=''">name=#{name},</if>
+			<if test="phone!=null and phone!=''">phone=#{phone},</if>
+			<if test="uid!=null and uid!=''">uid=#{uid},</if>
+		</trim>
+		WHERE id=#{id}
+
+	</update>
+
+	<delete id="deleteObject" parameterType="address"></delete>
+
+	<delete id="deleteObjectById" parameterType="int">delete from address
+		where id=#{id}
+	</delete>
+
+
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultMap="addressCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseAddressSql" />
+		where a.id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultMap="addressCustom">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseAddressSql" />
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null and entity.name!=''">
+					and a.name like '%${entity.name}%'
+				</if>
+				<if test="entity.address!=null and entity.address!=''">
+					and address = #{entity.address}
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.spare!=null and entity.spare!=''">
+					and a.spare= #{entity.spare}
+				</if>
+				<if test="entity.phone!=null and entity.phone!=''">
+					and a.phone= #{entity.phone}
+				</if>
+				<if test="entity.pname!=null and entity.pname!=''">
+					and pname= #{entity.pname}
+				</if>
+				<if test="entity.uid!=null and entity.uid!=''">
+					and uid= #{entity.uid}
+				</if>
+			</if>
+		</where>
+
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="int">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from address
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null and entity.name!=''">
+					and name like '%${entity.name}%'
+				</if>
+				<if test="entity.address!=null and entity.address!=''">
+					and address = #{entity.address}
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.spare!=null and entity.spare!=''">
+					and spare= #{entity.spare}
+				</if>
+				<if test="entity.phone!=null and entity.phone!=''">
+					and phone= #{entity.phone}
+				</if>
+				<if test="entity.pname!=null and entity.pname!=''">
+					and pname= #{entity.pname}
+				</if>
+				<if test="entity.uid!=null and entity.uid!=''">
+					and uid= #{entity.uid}
+				</if>
+			</if>
+		</where>
+	</select>
+</mapper>

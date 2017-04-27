@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="www.change.tm.changeshop.mapper.ActivityMapper">
+
+	<!-- 定义基本的sql语句 -->
+	<sql id="baseActivitySql">
+		select
+		id,interpor,href,img,name,remark,spare
+		from activity
+	</sql>
+
+	<!-- 普通插入的操作实现 -->
+	<insert id="saveObject" parameterType="activity">
+	<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			select LAST_INSERT_ID()
+		</selectKey>
+	insert into activity
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+		
+			<if test="name!=null and name!=''">name,</if>
+			
+			<if test="remark!=null and remark!=''">remark,</if>
+		
+		</trim> 
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+		
+			<if test="name!=null and name!=''">#{name},</if>
+			
+			<if test="remark!=null and remark!=''">#{remark}</if>
+		
+		</trim>
+		
+	</insert>
+
+	<update id="updateObject" parameterType="activity">
+	UPDATE activity
+		<trim prefix="set" suffixOverrides=",">
+			
+			
+		
+			<if test="name!=null and name!=''">name=#{name,jdbcType=VARCHAR},</if>
+			
+			<if test="remark!=null and remark!=''">remark=#{remark,jdbcType=VARCHAR},</if>
+		
+		</trim>
+		WHERE id=#{id}
+
+	</update>
+
+	<delete id="deleteObject" parameterType="activity"></delete>
+
+	<delete id="deleteObjectById" parameterType="int">
+	delete from activity where id=#{id,jdbcType=INTEGER}
+	</delete>
+
+
+
+	<!-- 根据id查询单个实体对象 -->
+	<select id="getObjectById" parameterType="int" resultType="activity">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseActivitySql" />
+		where id=#{id}
+	</select>
+
+	<select id="getObjects" parameterType="queryVo" resultType="activity">
+		<!-- 引入指定的sql语句 -->
+		<include refid="baseActivitySql" />
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null">
+					and name like '%${entity.name}%'
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.remark!=null">
+					and remark like '%${entity.remark}%'
+				</if>
+			</if>
+		</where>
+
+		<!-- 排序的操作 -->
+		<if test="sort!=null and desc!=null">
+			order by ${sort} ${desc}
+		</if>
+		<!-- 分页拼装 -->
+		<if test="startSize!=null and pageSize!=null">
+			limit #{startSize},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getObjectsSize" parameterType="queryVo" resultType="int">
+		<!-- 引入指定的sql语句 -->
+		select count(*) from activity
+		<where>
+			<!-- 拼接sql语句 -->
+			<if test="entity!=null">
+				<if test="entity.name!=null">
+					and name like '%${entity.name}%'
+				</if>
+				<!-- 其它条件 -->
+				<if test="entity.remark!=null">
+					and remark like '%${entity.remark}%'
+				</if>
+			</if>
+		</where>
+	</select>
+
+
+</mapper>
